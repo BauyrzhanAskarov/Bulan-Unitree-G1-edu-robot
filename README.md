@@ -1,4 +1,3 @@
-# Bulan-Unitree-G1-edu-robot
 
 # 📌 Useful Links for Unitree G1 Project
 
