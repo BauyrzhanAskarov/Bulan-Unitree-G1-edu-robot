@@ -98,9 +98,8 @@ RUN if [ -f requirements.txt ]; then \
     fi
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libvulkan1 vulkan-tools libgl1 libglu1-mesa libxt6
-
-
+    libvulkan1 vulkan-tools libgl1 libglu1-mesa libxt6 gcc-12 libgcc-12-dev libstdc++-12-dev && \
+    echo "export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgcc_s.so.1" >> ~/.bashrc
 
 # Final shell
 ENTRYPOINT ["/bin/bash"]
