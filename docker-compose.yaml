@@ -1,0 +1,22 @@
+services:
+  unitree_isaac_sim:
+    image: unitree_isaac_sim
+    container_name: unitree_isaac_sim
+    network_mode: host
+    runtime: nvidia
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json
+      - __GLX_VENDOR_LIBRARY_NAME=nvidia
+      - XDG_RUNTIME_DIR=/tmp
+      - OMNI_KIT_ACCEPT_EULA=Y
+      - ACCEPT_EULA=Y
+      - LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgcc_s.so.1  # Include if needed
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /usr/share/vulkan/icd.d/nvidia_icd.json:/usr/share/vulkan/icd.d/nvidia_icd.json:ro
+      - /usr/share/glvnd/egl_vendor.d:/usr/share/glvnd/egl_vendor.d:ro
+    stdin_open: true
+    tty: true
