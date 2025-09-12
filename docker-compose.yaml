@@ -1,7 +1,7 @@
 services:
-  unitree_isaac_sim:
-    image: unitree_isaac_sim
-    container_name: unitree_isaac_sim
+  unitree_isaac_sim_xr:
+    image: unitree_isaac_sim_xr
+    container_name: unitree_isaac_sim_xr
     network_mode: host
     runtime: nvidia
     environment:

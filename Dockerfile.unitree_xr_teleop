@@ -1,0 +1,41 @@
+# Build name: unitree_isaac_sim_xr
+FROM unitree_isaac_sim:latest
+
+# System deps for git submodules, certs, and building wheels
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      git git-lfs openssl curl build-essential cmake \
+      libeigen3-dev libboost-all-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# 1) Get xr_teleoperate + submodules (televuer & dex-retargeting)
+RUN git clone https://github.com/unitreerobotics/xr_teleoperate.git \
+ && cd xr_teleoperate \
+ && git submodule update --init --depth 1
+
+# 2) Python deps — keep base PyTorch intact
+RUN python3 -m pip install --upgrade pip \
+ && cd /workspace/xr_teleoperate/teleop/televuer \
+ && python3 -m pip install -e . --no-deps \
+ && openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+      -subj "/C=US/ST=CA/L=SF/O=Vuer/OU=Dev/CN=localhost" \
+      -keyout key.pem -out cert.pem \
+ && cd /workspace/xr_teleoperate/teleop/robot_control/dex-retargeting \
+ && python3 -m pip install -e . --no-deps \
+ && cd /workspace/xr_teleoperate \
+ && awk '!/^(torch|torchvision|torchaudio)([[:space:]=<>].*)?$/ {print}' requirements.txt > requirements.no-torch.txt \
+ && python3 -m pip install -r requirements.no-torch.txt
+
+# Convenience: where the teleop app lives
+ENV XR_TELEOP_DIR=/workspace/xr_teleoperate/teleop
+WORKDIR /workspace
+
+RUN python -m pip install --no-cache-dir "vuer[all]" "numpy>=1.21" aiohttp aiohttp-cors fastapi uvicorn
+RUN /opt/conda/envs/unitree_sim_env/bin/python -m pip uninstall -y pinocchio || true  && /opt/conda/bin/conda install -y -n unitree_sim_env -c conda-forge "pinocchio>=3.5" casadi  && /opt/conda/envs/unitree_sim_env/bin/python
+
+# XR web UI port (Vuer) used by the headset browser (https://HOST:8012)
+EXPOSE 8012
+
+# Default workdir
+WORKDIR /workspace
